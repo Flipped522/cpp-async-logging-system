@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <string>
 #include <iostream>
-namespace Util
+namespace log
 {
     class Date
     {
