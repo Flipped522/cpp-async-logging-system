@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __M_TIL_U
-#define __M_TIL_U
+#ifndef __M_UTIL_H
+#define __M_UTIL_H
 #include <ctime>
 #include <sys/stat.h>
 #include <string>
@@ -71,4 +71,4 @@ namespace Util
 
 };
 
-#endif // !__M_TIL_U
+#endif // !__M_UTIL_H
