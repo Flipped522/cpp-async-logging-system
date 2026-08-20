@@ -1,4 +1,6 @@
+#pragma once
 #include "util.hpp"
+#include "message.hpp"
 #include <iostream>
 
 int main()
