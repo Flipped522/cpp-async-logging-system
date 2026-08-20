@@ -2,6 +2,7 @@
     1. 定义枚举类，枚举出日志等级
     2. 提供转换接口，将枚举转换为对应的字符串
 */
+#pragma once
 #ifndef __M_LEVEL
 #define __M_LEVEL
 namespace log
