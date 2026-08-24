@@ -4,6 +4,7 @@
 #define __M_FMT_H__
 #include <memory>
 #include <ctime>
+#include <vector>
 #include "level.hpp"
 #include "message.hpp"
 
@@ -120,6 +121,41 @@ namespace log
 
     private:
         std::string _str;
+    };
+
+    class Formatter
+    {
+        /*
+            %d 表示日期，包含子格式{%H:%M:%S}
+            %t 表示线程id
+            %c 表示日志器名称
+            %f 表示源码文件名
+            %l 表示源码行号
+            %p 表示日志级别
+            %T 表示制表符缩进
+            %m 表示主体消息
+            %n 表示换行
+        */
+    public:
+        Formatter(const std::string &pattern = "[%d{%H:%M:%S}][%t][%c][%f:%l][%p]%T%m%n")
+            : _pattern(pattern)
+        {
+        }
+
+        // 对msg进行格式化
+        std::string format(LogMsg &msg);
+        void format(std::ostream &out, LogMsg &msg);
+
+        // 对格式化规则字符串进行解析
+        bool parsePattern();
+
+    private:
+        // 根据不同的格式化字符 创建不同的格式化子项对象
+        FormatItem::ptr createItem(const std::string &key, const std::string& val);
+
+    private:
+        std::string _pattern; // 格式化规则字符串
+        std::vector<FormatItem::ptr> _items;
     };
 };
 
