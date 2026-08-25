@@ -5,6 +5,8 @@
 #include <memory>
 #include <ctime>
 #include <vector>
+#include <cassert>
+#include <sstream>
 #include "level.hpp"
 #include "message.hpp"
 
@@ -63,7 +65,7 @@ namespace log
         }
     };
 
-    class LinelFormatItem : public FormatItem
+    class LineFormatItem : public FormatItem
     {
     public:
         void format(std::ostream &out, LogMsg &msg) override
@@ -140,18 +142,55 @@ namespace log
         Formatter(const std::string &pattern = "[%d{%H:%M:%S}][%t][%c][%f:%l][%p]%T%m%n")
             : _pattern(pattern)
         {
+            assert(parsePattern());
         }
 
         // 对msg进行格式化
-        std::string format(LogMsg &msg);
-        void format(std::ostream &out, LogMsg &msg);
+        std::string format(LogMsg &msg)
+        {
+            std::stringstream ss;
+            format(ss, msg);
+
+            return ss.str();
+        }
+        void format(std::ostream &out, LogMsg &msg)
+        {
+            for (auto &item : _items)
+            {
+                item->format(out, msg);
+            }
+        }
 
         // 对格式化规则字符串进行解析
-        bool parsePattern();
+        bool parsePattern()
+        {
+            return;
+        }
 
     private:
         // 根据不同的格式化字符 创建不同的格式化子项对象
-        FormatItem::ptr createItem(const std::string &key, const std::string& val);
+        FormatItem::ptr createItem(const std::string &key, const std::string &val)
+        {
+            if ("d" == key)
+                return std::make_shared<TimeFormatItem>(val);
+            if ("t" == key)
+                return std::make_shared<ThreadFormatItem>();
+            if ("c" == key)
+                return std::make_shared<LoggerFormatItem>();
+            if ("f" == key)
+                return std::make_shared<FileFormatItem>();
+            if ("l" == key)
+                return std::make_shared<LineFormatItem>();
+            if ("p" == key)
+                return std::make_shared<LevelFormatItem>();
+            if ("T" == key)
+                return std::make_shared<TabFormatItem>();
+            if ("m" == key)
+                return std::make_shared<MsgFormatItem>();
+            if ("n" == key)
+                return std::make_shared<NLineFormatItem>();
+            return std::make_shared<OtherFormatItem>(val);
+        }
 
     private:
         std::string _pattern; // 格式化规则字符串
