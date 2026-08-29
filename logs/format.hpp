@@ -164,6 +164,57 @@ namespace log
         // 对格式化规则字符串进行解析
         bool parsePattern()
         {
+            // 1. 对格式化规则字符串进行解析
+            std::vector<std::pair<std::string, std::string>> fmt_order;
+            int pos = 0;
+            std::string key, val;
+            while (pos < _pattern.size())
+            {
+                if ('%' != _pattern[pos])
+                {
+                    val.push_back(_pattern[pos++]);
+                    continue;
+                }
+                else if (pos + 1 < _pattern.size() && '%' == _pattern[pos + 1])
+                {
+                    val.push_back('%');
+                    pos += 2;
+                    continue;
+                }
+
+                if (!val.empty())
+                {
+                    fmt_order.push_back(std::make_pair("", val));
+                    val.clear();
+                }
+
+                ++pos;
+                if (_pattern.size() == pos)
+                {
+                    std::cout << "%之后没有对应的格式化字符" << std::endl;
+                    return false;
+                }
+                key = _pattern[pos];
+                ++pos;
+                if (pos < _pattern.size() && '{' == _pattern[pos])
+                {
+                    ++pos;
+                    while (pos < _pattern.size() && '}' != _pattern[pos])
+                    {
+                        val.push_back(_pattern[pos++]);
+                    }
+                    if (pos == _pattern.size())
+                    {
+                        std::cout << "子规则{}匹配出错" << std::endl;
+                        return false;
+                    }
+                    ++pos;
+                }
+                fmt_order.push_back(std::make_pair(key, val));
+                key.clear();
+                val.clear();
+            }
+            // 2. 根据解析得到的数据化格式子项数组成员
             return;
         }
 
