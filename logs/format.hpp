@@ -161,6 +161,7 @@ namespace log
             }
         }
 
+    private:
         // 对格式化规则字符串进行解析
         bool parsePattern()
         {
@@ -215,10 +216,13 @@ namespace log
                 val.clear();
             }
             // 2. 根据解析得到的数据化格式子项数组成员
-            return;
+            for (auto &it : fmt_order)
+            {
+                _items.push_back(createItem(it.first, it.second));
+            }
+            return true;
         }
 
-    private:
         // 根据不同的格式化字符 创建不同的格式化子项对象
         FormatItem::ptr createItem(const std::string &key, const std::string &val)
         {
@@ -240,7 +244,12 @@ namespace log
                 return std::make_shared<MsgFormatItem>();
             if ("n" == key)
                 return std::make_shared<NLineFormatItem>();
-            return std::make_shared<OtherFormatItem>(val);
+            if (key.empty())
+                return std::make_shared<OtherFormatItem>(val);
+            
+            std::cout << "没有对应的格式化字符: %" << key << std::endl;
+            abort();
+            return FormatItem::ptr();
         }
 
     private:

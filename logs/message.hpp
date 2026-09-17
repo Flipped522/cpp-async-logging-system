@@ -18,7 +18,6 @@ namespace log
         std::string _logger;    // 日志器名称
         std::string _payload;   // 有效消息数据
         LogMsg(LogLevel::value level,
-               size_t ctime,
                size_t line,
                const std::string file,
                const std::string logger,
@@ -28,7 +27,7 @@ namespace log
                                         _tid(std::this_thread::get_id()),
                                         _file(file),
                                         _logger(logger),
-                                        _payload(_payload)
+                                        _payload(msg)
         {
         }
     };
