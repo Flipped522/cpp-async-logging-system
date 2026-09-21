@@ -139,6 +139,7 @@ namespace log
             %n 表示换行
         */
     public:
+        using ptr = std::shared_ptr<Formatter>;
         Formatter(const std::string &pattern = "[%d{%H:%M:%S}][%t][%c][%f:%l][%p]%T%m%n")
             : _pattern(pattern)
         {
@@ -246,7 +247,7 @@ namespace log
                 return std::make_shared<NLineFormatItem>();
             if (key.empty())
                 return std::make_shared<OtherFormatItem>(val);
-            
+
             std::cout << "没有对应的格式化字符: %" << key << std::endl;
             abort();
             return FormatItem::ptr();
