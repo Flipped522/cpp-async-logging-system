@@ -38,7 +38,7 @@ namespace log
         FileSink(const std::string &pathname) : _pathname(pathname)
         {
             // 1. 创建日志文件所在的目录
-            File::CreateDirectory(File::path(pathname));
+            util::File::CreateDirectory(util::File::path(pathname));
             // 2. 创建并打开日志文件
             _ofs.open(_pathname, std::ios::binary | std::ios::app);
             assert(_ofs.is_open());
@@ -63,7 +63,7 @@ namespace log
         {
             std::string pathname = createNewFile();
             // 1. 创建日志文件所在的目录
-            File::CreateDirectory(File::path(pathname));
+            util::File::CreateDirectory(util::File::path(pathname));
             // 2. 创建并打开日志文件
             _ofs.open(pathname, std::ios::binary | std::ios::app);
             assert(_ofs.is_open());
@@ -89,7 +89,7 @@ namespace log
         std::string createNewFile() // 进行大小判断，超过指定大小则创建新文件
         {
             // 获取系统时间，以时间来构造文件名扩展名
-            time_t t = Date::now();
+            time_t t = util::Date::now();
             struct tm lt;
             localtime_r(&t, &lt);
             std::stringstream filename;

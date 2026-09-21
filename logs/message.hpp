@@ -21,7 +21,7 @@ namespace log
                size_t line,
                const std::string file,
                const std::string logger,
-               const std::string msg) : _ctime(Date::now()),
+               const std::string msg) : _ctime(util::Date::now()),
                                         _level(level),
                                         _line(line),
                                         _tid(std::this_thread::get_id()),
