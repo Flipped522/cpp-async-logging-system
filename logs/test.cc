@@ -3,6 +3,7 @@
 #include "message.hpp"
 #include "format.hpp"
 #include "sink.hpp"
+#include "logger.hpp"
 #include <iostream>
 #include <unistd.h>
 
@@ -90,29 +91,52 @@ private:
 
 int main()
 {
-    log::LogMsg msg(log::LogLevel::value::INFO, 53, "main.c", "root", "格式化功能测试...");
-    log::Formatter fmt;
-    std::string str = fmt.format(msg);
-    // log::LogSink::ptr stdout_lsp = log::SinkFactory::create<log::StdoutSink>();
-    // log::LogSink::ptr file_lsp = log::SinkFactory::create<log::FileSink>("./logfile/test.log");
-    // log::LogSink::ptr roll_lsp = log::SinkFactory::create<log::RollBySizeSink>("./logfile/roll-", 1024 * 1024);
-    log::LogSink::ptr time_lsp = log::SinkFactory::create<RollByTimeSink>("./logfile/roll-",TimeGap::GAP_SECOND);
-    
-    // stdout_lsp->log(str.c_str(), str.size());
-    // file_lsp->log(str.c_str(), str.size());
-    // size_t cursize = 0;
-    // size_t count = 0;
-    // while (cursize < 1024 * 1024 * 10)
+    // log::LogMsg msg(log::LogLevel::value::INFO, 53, "main.c", "root", "格式化功能测试...");
+    // log::Formatter fmt;
+    // std::string str = fmt.format(msg);
+    // // log::LogSink::ptr stdout_lsp = log::SinkFactory::create<log::StdoutSink>();
+    // // log::LogSink::ptr file_lsp = log::SinkFactory::create<log::FileSink>("./logfile/test.log");
+    // // log::LogSink::ptr roll_lsp = log::SinkFactory::create<log::RollBySizeSink>("./logfile/roll-", 1024 * 1024);
+    // log::LogSink::ptr time_lsp = log::SinkFactory::create<RollByTimeSink>("./logfile/roll-",TimeGap::GAP_SECOND);
+
+    // // stdout_lsp->log(str.c_str(), str.size());
+    // // file_lsp->log(str.c_str(), str.size());
+    // // size_t cursize = 0;
+    // // size_t count = 0;
+    // // while (cursize < 1024 * 1024 * 10)
+    // // {
+    // //     std::string tmp = str + std::to_string(count++);
+    // //     roll_lsp->log(tmp.c_str(), tmp.size());
+    // //     cursize += str.size();
+    // // }
+    // time_t old = log::util::Date::now();
+    // while(log::util::Date::now() < old + 5)
     // {
-    //     std::string tmp = str + std::to_string(count++);
-    //     roll_lsp->log(tmp.c_str(), tmp.size());
-    //     cursize += str.size();
+    //     time_lsp->log(str.c_str(), str.size());
+    //     usleep(1000);
     // }
-    time_t old = log::util::Date::now();
-    while(log::util::Date::now() < old + 5)
+
+    std::string logger_name = "sync_logger";
+    log::LogLevel::value limit = log::LogLevel::value::WARN;
+    log::Formatter::ptr fmt(new log::Formatter("[%d{%H:%M:%S}][%c][%f:%l][%p]%T%m%n"));
+
+    log::LogSink::ptr stdout_lsp = log::SinkFactory::create<log::StdoutSink>();
+    log::LogSink::ptr file_lsp = log::SinkFactory::create<log::FileSink>("./logfile/test.log");
+    log::LogSink::ptr roll_lsp = log::SinkFactory::create<log::RollBySizeSink>("./logfile/roll-", 1024 * 1024);
+    std::vector<log::LogSink::ptr> sinks = {stdout_lsp, file_lsp, roll_lsp};
+    log::Logger::ptr logger(new log::SyncLogger(logger_name, limit, fmt, sinks));
+    size_t cursize = 0;
+    size_t count = 0;
+    std::string str = "Test Log-";
+    logger->debug(__FILE__, __LINE__, "%s", "测试日志");
+    logger->info(__FILE__, __LINE__, "%s", "测试日志");
+    logger->warn(__FILE__, __LINE__, "%s", "测试日志");
+    logger->error(__FILE__, __LINE__, "%s", "测试日志");
+    logger->fatal(__FILE__, __LINE__, "%s", "测试日志");
+    while (cursize < 1024 * 1024 * 10)
     {
-        time_lsp->log(str.c_str(), str.size());
-        usleep(1000);
+        logger->fatal(__FILE__, __LINE__, "测试日志-%d", count++);
+        cursize += 20;
     }
 
     return 0;

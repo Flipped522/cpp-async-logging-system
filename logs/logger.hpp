@@ -57,7 +57,7 @@ namespace log
         void info(const std::string &file, size_t line, const std::string &fmt, ...)
         {
             // 1. 通过传入的参数构造日志消息对象，进行日志的格式化，最终落地
-            if (LogLevel::value::DEBUG < _limit_level)
+            if (LogLevel::value::INFO < _limit_level)
             {
                 return;
             }
@@ -82,7 +82,7 @@ namespace log
         void warn(const std::string &file, size_t line, const std::string &fmt, ...)
         {
             // 1. 通过传入的参数构造日志消息对象，进行日志的格式化，最终落地
-            if (LogLevel::value::DEBUG < _limit_level)
+            if (LogLevel::value::WARN < _limit_level)
             {
                 return;
             }
@@ -107,7 +107,7 @@ namespace log
         void error(const std::string &file, size_t line, const std::string &fmt, ...)
         {
             // 1. 通过传入的参数构造日志消息对象，进行日志的格式化，最终落地
-            if (LogLevel::value::DEBUG < _limit_level)
+            if (LogLevel::value::ERROR < _limit_level)
             {
                 return;
             }
@@ -132,7 +132,7 @@ namespace log
         void fatal(const std::string &file, size_t line, const std::string &fmt, ...)
         {
             // 1. 通过传入的参数构造日志消息对象，进行日志的格式化，最终落地
-            if (LogLevel::value::DEBUG < _limit_level)
+            if (LogLevel::value::FATAL < _limit_level)
             {
                 return;
             }
