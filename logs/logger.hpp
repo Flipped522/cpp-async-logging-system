@@ -198,4 +198,75 @@ namespace log
             }
         }
     };
+    enum class LoggerType
+    {
+        LOGGER_SYNC,
+        LOGGER_ASYNC
+    };
+    // 建造者模式构建日志器
+    // 1. 抽象一个建造者类（完成日志器对象所需零部件的构建&日志器构建）
+    // 1. 设置日志器类型
+    // 2. 将不同类型的日志器的创建放在一个日志器建造者类中完成
+    class LoggerBuilder
+    {
+    public:
+        LoggerBuilder() : _logger_type(LoggerType::LOGGER_SYNC),
+                          _limit_level(LogLevel::value::DEBUG)
+
+        {
+        }
+        void buildLoggerType(LoggerType type)
+        {
+            _logger_type = type;
+        }
+        void buildLoggerName(const std::string &name)
+        {
+            _logger_name = name;
+        }
+        void buildLoggerLevel(LogLevel::value level)
+        {
+            _limit_level = level;
+        }
+        void buildLoggerFormatter(const std::string &pattern)
+        {
+            _formatter = std::make_shared<Formatter>(pattern);
+        }
+        template <typename SinkType, typename... Args>
+        void buildSink(Args &&...args)
+        {
+            LogSink::ptr psink = SinkFactory::create<SinkType>(std::forward<Args>(args)...);
+            _sinks.push_back(psink);
+        }
+        virtual Logger::ptr build() = 0;
+
+    protected:
+        LoggerType _logger_type;
+        std::string _logger_name;
+        LogLevel::value _limit_level;
+        Formatter::ptr _formatter;
+        std::vector<LogSink::ptr> _sinks;
+    };
+    // 2. 派生出具体的建造者类 --- 局部日志器的建造者 & 全局日志器建造者
+    class LocalLoggerBuilder : public LoggerBuilder
+    {
+    public:
+        Logger::ptr build() override
+        {
+            assert(_logger_name.empty()); // 必须有日志器名称
+            if(nullptr == _formatter.get())
+            {
+                _formatter = std::make_shared<Formatter>();
+            }
+            if(_sinks.empty())
+            {
+                buildSink<StdoutSink>();
+            }
+            if(_logger_type == LoggerType::LOGGER_ASYNC)
+            {
+                
+            }
+            return std::make_shared<SyncLogger>(_logger_name, _limit_level, _formatter, _sinks);
+        }
+    };
+    // 3.
 };
