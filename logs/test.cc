@@ -116,23 +116,32 @@ int main()
     //     usleep(1000);
     // }
 
-    std::string logger_name = "sync_logger";
-    log::LogLevel::value limit = log::LogLevel::value::WARN;
-    log::Formatter::ptr fmt(new log::Formatter("[%d{%H:%M:%S}][%c][%f:%l][%p]%T%m%n"));
+    // std::string logger_name = "sync_logger";
+    // log::LogLevel::value limit = log::LogLevel::value::WARN;
+    // log::Formatter::ptr fmt(new log::Formatter("[%d{%H:%M:%S}][%c][%f:%l][%p]%T%m%n"));
 
-    log::LogSink::ptr stdout_lsp = log::SinkFactory::create<log::StdoutSink>();
-    log::LogSink::ptr file_lsp = log::SinkFactory::create<log::FileSink>("./logfile/test.log");
-    log::LogSink::ptr roll_lsp = log::SinkFactory::create<log::RollBySizeSink>("./logfile/roll-", 1024 * 1024);
-    std::vector<log::LogSink::ptr> sinks = {stdout_lsp, file_lsp, roll_lsp};
-    log::Logger::ptr logger(new log::SyncLogger(logger_name, limit, fmt, sinks));
-    size_t cursize = 0;
-    size_t count = 0;
-    std::string str = "Test Log-";
+    // log::LogSink::ptr stdout_lsp = log::SinkFactory::create<log::StdoutSink>();
+    // log::LogSink::ptr file_lsp = log::SinkFactory::create<log::FileSink>("./logfile/test.log");
+    // log::LogSink::ptr roll_lsp = log::SinkFactory::create<log::RollBySizeSink>("./logfile/roll-", 1024 * 1024);
+    // std::vector<log::LogSink::ptr> sinks = {stdout_lsp, file_lsp, roll_lsp};
+    // log::Logger::ptr logger(new log::SyncLogger(logger_name, limit, fmt, sinks));
+
+    std::unique_ptr<log::LoggerBuilder> builder(new log::LocalLoggerBuilder());
+    builder->buildLoggerName("sync_logger");
+    builder->buildLoggerLevel(log::LogLevel::value::WARN);
+    builder->buildFormatter("%m%n");
+    builder->buildLoggerType(log::LoggerType::LOGGER_SYNC);
+    builder->buildSink<log::FileSink>("./logfile/test.log");
+    builder->buildSink<log::StdoutSink>();
+    log::Logger::ptr logger = builder->build();
+
     logger->debug(__FILE__, __LINE__, "%s", "测试日志");
     logger->info(__FILE__, __LINE__, "%s", "测试日志");
     logger->warn(__FILE__, __LINE__, "%s", "测试日志");
     logger->error(__FILE__, __LINE__, "%s", "测试日志");
     logger->fatal(__FILE__, __LINE__, "%s", "测试日志");
+    size_t cursize = 0;
+    size_t count = 0;
     while (cursize < 1024 * 1024 * 10)
     {
         logger->fatal(__FILE__, __LINE__, "测试日志-%d", count++);

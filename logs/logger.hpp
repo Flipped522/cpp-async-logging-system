@@ -227,7 +227,7 @@ namespace log
         {
             _limit_level = level;
         }
-        void buildLoggerFormatter(const std::string &pattern)
+        void buildFormatter(const std::string &pattern)
         {
             _formatter = std::make_shared<Formatter>(pattern);
         }
@@ -252,7 +252,7 @@ namespace log
     public:
         Logger::ptr build() override
         {
-            assert(_logger_name.empty()); // 必须有日志器名称
+            assert(!_logger_name.empty()); // 必须有日志器名称
             if(nullptr == _formatter.get())
             {
                 _formatter = std::make_shared<Formatter>();
@@ -263,7 +263,7 @@ namespace log
             }
             if(_logger_type == LoggerType::LOGGER_ASYNC)
             {
-                
+
             }
             return std::make_shared<SyncLogger>(_logger_name, _limit_level, _formatter, _sinks);
         }
