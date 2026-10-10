@@ -4,6 +4,7 @@
 #include "format.hpp"
 #include "sink.hpp"
 #include "logger.hpp"
+#include "buffer.hpp"
 #include <iostream>
 #include <unistd.h>
 
@@ -126,27 +127,71 @@ int main()
     // std::vector<log::LogSink::ptr> sinks = {stdout_lsp, file_lsp, roll_lsp};
     // log::Logger::ptr logger(new log::SyncLogger(logger_name, limit, fmt, sinks));
 
-    std::unique_ptr<log::LoggerBuilder> builder(new log::LocalLoggerBuilder());
-    builder->buildLoggerName("sync_logger");
-    builder->buildLoggerLevel(log::LogLevel::value::WARN);
-    builder->buildFormatter("%m%n");
-    builder->buildLoggerType(log::LoggerType::LOGGER_SYNC);
-    builder->buildSink<log::FileSink>("./logfile/test.log");
-    builder->buildSink<log::StdoutSink>();
-    log::Logger::ptr logger = builder->build();
+    // std::unique_ptr<log::LoggerBuilder> builder(new log::LocalLoggerBuilder());
+    // builder->buildLoggerName("sync_logger");
+    // builder->buildLoggerLevel(log::LogLevel::value::WARN);
+    // builder->buildFormatter("%m%n");
+    // builder->buildLoggerType(log::LoggerType::LOGGER_SYNC);
+    // builder->buildSink<log::FileSink>("./logfile/test.log");
+    // builder->buildSink<log::StdoutSink>();
+    // log::Logger::ptr logger = builder->build();
 
-    logger->debug(__FILE__, __LINE__, "%s", "测试日志");
-    logger->info(__FILE__, __LINE__, "%s", "测试日志");
-    logger->warn(__FILE__, __LINE__, "%s", "测试日志");
-    logger->error(__FILE__, __LINE__, "%s", "测试日志");
-    logger->fatal(__FILE__, __LINE__, "%s", "测试日志");
-    size_t cursize = 0;
-    size_t count = 0;
-    while (cursize < 1024 * 1024 * 10)
+    // logger->debug(__FILE__, __LINE__, "%s", "测试日志");
+    // logger->info(__FILE__, __LINE__, "%s", "测试日志");
+    // logger->warn(__FILE__, __LINE__, "%s", "测试日志");
+    // logger->error(__FILE__, __LINE__, "%s", "测试日志");
+    // logger->fatal(__FILE__, __LINE__, "%s", "测试日志");
+    // size_t cursize = 0;
+    // size_t count = 0;
+    // while (cursize < 1024 * 1024 * 10)
+    // {
+    //     logger->fatal(__FILE__, __LINE__, "测试日志-%d", count++);
+    //     cursize += 20;
+    // }
+
+    std::ifstream ifs("./logfile/test.log", std::ios::binary);
+    if (ifs.is_open() == false)
     {
-        logger->fatal(__FILE__, __LINE__, "测试日志-%d", count++);
-        cursize += 20;
+        std::cout << "open failed\n";
+        return -1;
     }
+
+    ifs.seekg(0, std::ios::end); // 读写位置跳转到文件末尾
+    size_t fsize = ifs.tellg();  // 获取当前位置相对于起始位置的偏移量
+    ifs.seekg(0, std::ios::beg); // 重新跳转到起始位置
+    std::string body;
+    body.resize(fsize);
+    ifs.read(&body[0], fsize);
+    if(ifs.good() == false)
+    {
+        std::cout << "read error\n";
+        return -1;
+    }
+
+    std::cout << fsize << std::endl;
+
+    ifs.close();
+    log::Buffer buffer;
+    for(int i = 0;i < body.size(); ++i)
+    {
+        buffer.push(&body[i], 1);
+    }
+    std::cout << buffer.readAbleSize() << std::endl;
+
+    std::ofstream ofs("./logfile/tmp.log", std::ios::binary);
+    ofs.write(buffer.begin(), buffer.readAbleSize());
+    for(int i = 0;i < buffer.readAbleSize(); ++i)
+    {
+        ofs.write(buffer.begin(), 1);
+        if(ofs.good() == false)
+        {
+            std::cout << "write error!\n";
+            return -1;
+        }
+        buffer.moveReader(1);
+    }
+
+    ofs.close();
 
     return 0;
 }
